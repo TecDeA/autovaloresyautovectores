@@ -197,21 +197,6 @@
     letter-spacing:.03em;
     cursor:default;white-space:nowrap;
   }
-  details.card{padding:0 0 6px;overflow:hidden}
-  details.card summary{
-    list-style:none;cursor:pointer;user-select:none;
-    padding:16px 20px;margin:0;
-    font-size:14px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:#aebbf0;
-    display:flex;align-items:center;gap:8px;
-  }
-  details.card summary::-webkit-details-marker{display:none}
-  details.card summary::after{content:'+';margin-left:auto;color:var(--acc);font-size:19px;font-weight:700}
-  details.card[open] summary::after{content:'−'}
-  details.card summary:hover{color:#cdd7ff}
-  .ayuda-body{border-top:1px solid var(--line);padding:6px 20px 14px}
-  .ayuda-body p{font-size:14px;color:#c3cdf2;line-height:1.7;margin:12px 0}
-  .ayuda-body b{color:#e6ebff}
-  .ayuda-body .formula{font-size:14.5px;margin:12px 0}
 </style>
 </head>
 <body>
@@ -223,39 +208,9 @@
     </div>
     <p>Introduce una matriz cuadrada <b>A</b> de tamaño <b>n × n</b>. La aplicación calculará su
        polinomio característico, sus autovalores (reales y complejos), una base de cada
-       subespacio propio <b>E<sub>λ</sub> = Ker(A − λI)</b> (<a href="#ayuda">ver qué significa</a>)
+       subespacio propio <b>E<sub>λ</sub> = Ker(A − λI)</b>
        y las multiplicidades algebraica y geométrica.</p>
   </header>
-
-  <details class="card" id="ayuda">
-    <summary>¿Qué significa E<sub>λ</sub> = Ker(A − λI)?</summary>
-    <div class="ayuda-body">
-      <p><b>Definición.</b> Sea A una matriz cuadrada de tamaño n × n. Un número λ es un <b>autovalor</b>
-         de A si existe algún vector v ≠ 0 tal que A·v = λ·v; cada uno de esos vectores es un
-         <b>autovector</b> asociado a λ. El <b>subespacio propio</b> asociado a λ es el conjunto formado
-         por todos sus autovectores junto con el vector 0:</p>
-      <div class="formula">E<sub>λ</sub> = { v ∈ ℝ<sup>n</sup> : A·v = λ·v }</div>
-      <p>Restando λ·v en los dos miembros, la condición A·v = λ·v equivale al sistema homogéneo
-         (A − λ·I)·v = 0, donde I es la matriz identidad de tamaño n. El conjunto de soluciones de un
-         sistema homogéneo M·x = 0 se llama <b>espacio nulo</b> (o <b>núcleo</b>) de la matriz M. Por tanto:</p>
-      <div class="formula">E<sub>λ</sub> = Ker(A − λ·I) = Nul(A − λ·I) = { v : (A − λ·I)·v = 0 }</div>
-      <p><b>Sobre la notación.</b> Ker viene de «Kern» (núcleo, notación habitual en español) y Nul de
-         «null space» (espacio nulo, usada en libros de texto en inglés, p. ej. el de D. C. Lay). Las dos
-         designan exactamente lo mismo: el conjunto de todos los vectores que la matriz M envía al vector
-         0. Aquí usamos Ker; si λ es complejo, el conjunto vive en ℂ<sup>n</sup> en lugar de ℝ<sup>n</sup>.</p>
-      <p><b>Por qué es un subespacio.</b> Como E<sub>λ</sub> es el conjunto de soluciones de un sistema
-         homogéneo, siempre es un subespacio vectorial: contiene al vector 0, y si u, w ∈ E<sub>λ</sub>,
-         entonces A·(u + w) = λ·u + λ·w = λ·(u + w) y A·(c·u) = c·(λ·u), de modo que u + w y c·u también
-         pertenecen a E<sub>λ</sub>. Su dimensión es la <b>multiplicidad geométrica</b> de λ, y una base
-         se obtiene resolviendo (A − λ·I)·v = 0 por eliminación gaussiana–Jordan: cada variable libre
-         aporta un vector de la base. Si la dimensión geométrica es menor que la algebraica, la matriz es
-         defectuosa para ese autovalor y no será diagonalizable.</p>
-      <p><b>Ejemplo.</b> Para la matriz A = [[2, 1], [1, 2]] (filas (2, 1) y (1, 2)), el polinomio
-         característico es (λ − 1)·(λ − 3), luego los autovalores son λ = 1 y λ = 3, y
-         E<sub>3</sub> = Ker(A − 3I) = gen{(1, 1)}, la recta y = x. Pulsa «Cargar ejemplo» y «Calcular»
-         para comprobarlo en la sección 3.</p>
-    </div>
-  </details>
 
   <section class="card">
     <div class="row">
@@ -1018,13 +973,6 @@ buildMatrix(3);
   });
 
   window.addEventListener('appinstalled', () => { btn.hidden = true; });
-
-  document.querySelectorAll('a[href="#ayuda"]').forEach(a => {
-    a.addEventListener('click', () => {
-      const d = document.getElementById('ayuda');
-      if(d) d.open = true;
-    });
-  });
 
   if('serviceWorker' in navigator){
     navigator.serviceWorker.addEventListener('message', e => {

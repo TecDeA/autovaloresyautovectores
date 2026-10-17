@@ -979,8 +979,27 @@ buildMatrix(3);
   function pedirVersion(){
     if(navigator.serviceWorker.controller){
       navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
+    } else if('serviceWorker' in navigator){
+      /* Aún no hay controlador (primera carga): el worker activo
+         también puede responderle directamente a esta página. */
+      navigator.serviceWorker.ready.then((reg) => {
+        if(reg.active) reg.active.postMessage({ type: 'GET_VERSION' });
+      }).catch(() => {});
     }
   }
+  /* Plan B: si el worker no responde (p. ej. todavía controla una versión
+     antigua sin soporte de mensajes, o el registro falla), se lee la
+     APP_VERSION directamente del fichero sw.js por red. */
+  function versionDesdeFichero(){
+    fetch('./sw.js', { cache: 'no-store' })
+      .then(r => r.ok ? r.text() : Promise.reject(new Error('HTTP ' + r.status)))
+      .then(txt => {
+        const m = txt.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
+        if(m) mostrarVersion(m[1]);
+      })
+      .catch(() => {});
+  }
+  setTimeout(() => { if(chip.hidden) versionDesdeFichero(); }, 1500);
 
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();

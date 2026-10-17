@@ -1,0 +1,26 @@
+{
+  "id": "./",
+  "name": "Autovalores, autovectores y subespacios propios",
+  "short_name": "Autovalores",
+  "description": "Calcula el polinomio característico, los autovalores (reales y complejos) y una base de cada subespacio propio Eλ = Ker(A − λI), con multiplicidades algebraica y geométrica.",
+  "lang": "es",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "background_color": "#0b0e1a",
+  "theme_color": "#0b0e1a",
+  "orientation": "any",
+  "categories": ["education", "utilities"],
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "img/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "screenshots": [
+    { "src": "img/screenshot-desktop.png", "sizes": "1280x720", "type": "image/png", "form_factor": "wide", "label": "Resultados del cálculo de autovalores y subespacios propios" },
+    { "src": "img/screenshot-mobile.png", "sizes": "390x844", "type": "image/png", "form_factor": "narrow", "label": "Vista en móvil con los resultados del cálculo" }
+  ]
+}

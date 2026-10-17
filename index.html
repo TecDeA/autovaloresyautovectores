@@ -189,6 +189,14 @@
   .foot-extra{display:block;margin-top:6px;font-size:11.5px;color:#4d5878}
   header a{color:var(--acc2);text-decoration:none;border-bottom:1px dotted rgba(56,217,176,.5)}
   header a:hover{filter:brightness(1.15)}
+  .title-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .chip.version{
+    background:linear-gradient(135deg,rgba(111,141,255,.20),rgba(56,217,176,.16));
+    border-color:#3a4a85;color:#c6cff5;
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    letter-spacing:.03em;
+    cursor:default;white-space:nowrap;
+  }
   details.card{padding:0 0 6px;overflow:hidden}
   details.card summary{
     list-style:none;cursor:pointer;user-select:none;
@@ -209,7 +217,10 @@
 <body>
 <div class="app">
   <header>
-    <h1>Autovalores, autovectores y subespacios propios</h1>
+    <div class="title-row">
+      <h1>Autovalores, autovectores y subespacios propios</h1>
+      <span class="chip version" id="chipVersion" hidden title="Versión de la aplicación, definida en sw.js"></span>
+    </div>
     <p>Introduce una matriz cuadrada <b>A</b> de tamaño <b>n × n</b>. La aplicación calculará su
        polinomio característico, sus autovalores (reales y complejos), una base de cada
        subespacio propio <b>E<sub>λ</sub> = Ker(A − λI)</b> (<a href="#ayuda">ver qué significa</a>)
@@ -956,7 +967,20 @@ buildMatrix(3);
    ================================================================== */
 (function(){
   const btn = document.getElementById('btnInstall');
+  const chip = document.getElementById('chipVersion');
   let deferredPrompt = null;
+
+  /* ---- Chip de versión: el valor vive en sw.js (APP_VERSION) ---- */
+  function mostrarVersion(v){
+    if(!v) return;
+    chip.textContent = 'v' + v;
+    chip.hidden = false;
+  }
+  function pedirVersion(){
+    if(navigator.serviceWorker.controller){
+      navigator.serviceWorker.controller.postMessage({ type: 'GET_VERSION' });
+    }
+  }
 
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -984,9 +1008,17 @@ buildMatrix(3);
   });
 
   if('serviceWorker' in navigator){
+    navigator.serviceWorker.addEventListener('message', e => {
+      const d = e.data || {};
+      if(d && d.type === 'VERSION') mostrarVersion(d.version);
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', pedirVersion);
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js', { scope: './' })
-        .then(reg => console.info('Service worker activo con alcance:', reg.scope))
+        .then(reg => {
+          console.info('Service worker activo con alcance:', reg.scope);
+          pedirVersion();
+        })
         .catch(err => console.warn('No se pudo registrar el service worker:', err));
     });
   }

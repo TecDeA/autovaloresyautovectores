@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autovalores, autovectores y subespacios propios</title>
+<style>
+  :root{
+    --bg1:#0b0e1a; --bg2:#070911;
+    --card:#151b31; --card2:#1c2444;
+    --line:#2a3358;
+    --txt:#e9edff; --muted:#98a2cc;
+    --acc:#6f8dff; --acc2:#38d9b0; --warn:#ffb648; --err:#ff6b81;
+    --paren:#aebbf0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:28px 16px 80px;
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    color:var(--txt);
+    background:
+      radial-gradient(900px 520px at 12% -12%, #22326b 0%, transparent 60%),
+      radial-gradient(760px 520px at 92% -5%, #16344d 0%, transparent 55%),
+      linear-gradient(180deg,var(--bg1),var(--bg2) 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{max-width:980px;margin:0 auto}
+  header h1{
+    margin:0 0 6px; font-size:clamp(20px,3.4vw,30px); font-weight:700;
+    letter-spacing:-.02em;
+    background:linear-gradient(90deg,#c9d6ff,#6f8dff 55%,#38d9b0);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header p{margin:0 0 22px;color:var(--muted);font-size:14.5px;line-height:1.55;max-width:70ch}
+
+  .card{
+    background:linear-gradient(180deg,var(--card),#121728);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 20px 18px;
+    margin-bottom:18px;
+    box-shadow:0 12px 32px rgba(0,0,0,.32);
+  }
+  .card h2{
+    margin:0 0 14px; font-size:15px; font-weight:650; letter-spacing:.04em;
+    text-transform:uppercase; color:#aebbf0;
+  }
+  .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  label{font-size:14px;color:var(--muted)}
+  input[type=number]{
+    width:76px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);
+    background:#0e1428;color:var(--txt);font-size:15px;text-align:center;outline:none;
+  }
+  input[type=number]:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(111,141,255,.16)}
+
+  button{
+    padding:10px 16px;border-radius:10px;border:1px solid transparent;
+    font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+    transition:transform .12s, filter .15s, box-shadow .15s;
+  }
+  button:active{transform:translateY(1px)}
+  .primary{background:linear-gradient(135deg,#6f8dff,#4f6ff0);color:#fff;box-shadow:0 8px 20px rgba(79,111,240,.35)}
+  .primary:hover{filter:brightness(1.08)}
+  .ghost{background:#1b2240;color:#c6cff5;border-color:var(--line)}
+  .ghost:hover{background:#232c52}
+
+  .toggle{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:13px;color:var(--muted);cursor:pointer;user-select:none;
+    padding:6px 10px;border:1px solid var(--line);border-radius:10px;
+    background:#111a36;transition:.15s;
+  }
+  .toggle:hover{border-color:#3a4a85}
+  .toggle input{width:15px;height:15px;accent-color:var(--acc);cursor:pointer;margin:0}
+
+  /* ---------- MATRIZ CON PARÉNTESIS ---------- */
+  .matrix-display{
+    display:flex;align-items:stretch;justify-content:center;
+    gap:6px;margin:18px auto 0;max-width:580px;padding:2px 0;
+  }
+  .matrix-display .grid{flex:0 0 auto;margin-top:0;gap:8px}
+  .paren{
+    flex:0 0 auto;width:16px;color:var(--paren);
+    overflow:visible;align-self:stretch;
+  }
+  .paren path{
+    stroke:currentColor;stroke-width:1.8px;stroke-linecap:round;
+    fill:none;vector-effect:non-scaling-stroke;
+  }
+
+  .grid{display:grid;gap:8px}
+  .cell{
+    width:100%;padding:10px 6px;text-align:center;
+    background:#0e1428;color:var(--txt);
+    border:1px solid var(--line);border-radius:10px;
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px;
+    outline:none;transition:.15s;
+  }
+  .cell:focus{border-color:var(--acc);box-shadow:0 0 0 3px rgba(111,141,255,.18);background:#111a36}
+  .hint{font-size:12.5px;color:#7c87b3;margin-top:12px;line-height:1.5}
+
+  .formula{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:16px;line-height:1.7;color:#dfe6ff;
+    background:#0e1428;border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;overflow-x:auto;white-space:nowrap;
+  }
+  .muted{color:var(--muted);font-size:13.5px;line-height:1.6;margin:10px 0 0}
+
+  .eig-top{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .eig-lam{font-size:17px;font-weight:650;margin-right:6px}
+  .eig-lam b{color:var(--acc2);font-family:ui-monospace,Menlo,Consolas,monospace}
+  .chip{
+    font-size:12px;padding:4px 10px;border-radius:999px;
+    background:#1e2749;border:1px solid var(--line);color:#b8c3ee;font-weight:600;
+  }
+  .chip.warn{background:#3a2c12;border-color:#6b5220;color:var(--warn)}
+  .chip.good{background:#10322a;border-color:#1d5f4d;color:var(--acc2)}
+
+  .eq{
+    font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:14.5px;color:#cbd5ff;background:#101630;
+    border-left:3px solid var(--acc);border-radius:0 10px 10px 0;
+    padding:11px 14px;margin:10px 0;overflow-x:auto;white-space:nowrap;
+  }
+
+  /* ---------- AUTOVECTORES ---------- */
+  .vecs{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px}
+  .vec{
+    font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14.5px;
+    color:#e2e9ff;background:#0e1428;border:1px solid var(--line);
+    border-radius:10px;padding:9px 14px;
+    display:inline-flex;align-items:center;gap:6px;
+    align-self:flex-start;max-width:100%;overflow-x:auto;
+  }
+  .vec .nm{color:var(--acc2);font-weight:700;font-size:15px}
+  .vec .eq-sign{color:var(--muted);font-weight:400}
+
+  .vec-wrap{
+    display:inline-flex;align-items:stretch;gap:2px;
+  }
+  .vec-wrap .paren{
+    width:11px;
+  }
+  .vec-wrap .paren path{
+    stroke-width:1.6px;
+  }
+  .vec-col{
+    display:flex;flex-direction:column;justify-content:center;
+    min-width:16px;min-height:20px;
+    padding:2px 6px;line-height:1.4;
+  }
+  .vec-row{
+    display:flex;flex-direction:row;align-items:center;
+    gap:14px;padding:2px 8px;line-height:1.4;
+  }
+  .vec-comp{
+    text-align:center;white-space:nowrap;
+  }
+  .transp{
+    color:var(--muted);font-size:11px;
+    align-self:flex-start;margin-top:3px;font-family:inherit;
+  }
+
+  .card.err{border-color:#5a2230;background:linear-gradient(180deg,#2a1420,#1c0e16);color:#ffb3bf}
+  .sep{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:16px 0}
+  .kv{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;color:#c3cdf2}
+  .kv span b{color:var(--acc2)}
+  footer{text-align:center;color:#5d6890;font-size:12.5px;margin-top:28px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Autovalores, autovectores y subespacios propios</h1>
+    <p>Introduce una matriz cuadrada <b>A</b> de tamaño <b>n × n</b>. La aplicación calculará su
+       polinomio característico, sus autovalores (reales y complejos), una base de cada
+       subespacio propio <b>E<sub>λ</sub> = Nul(A − λI)</b> y las multiplicidades algebraica y geométrica.</p>
+  </header>
+
+  <section class="card">
+    <div class="row">
+      <label for="n">Tamaño n</label>
+      <input type="number" id="n" min="1" max="8" value="3">
+      <button class="ghost" id="btnGen">Generar matriz</button>
+      <button class="ghost" id="btnEj">Cargar ejemplo</button>
+      <button class="primary" id="btnCalc">Calcular</button>
+      <label class="toggle" title="Cambia la orientación de los autovectores">
+        <input type="checkbox" id="orientVertical" checked>
+        <span>Vectores en columna</span>
+      </label>
+    </div>
+    <div id="matrixWrap"></div>
+    <p class="hint">Puedes escribir enteros, decimales o fracciones (por ejemplo <code>1/2</code> o <code>-3</code>).</p>
+  </section>
+
+  <section id="out"></section>
+
+  <footer>Cálculo numérico en doble precisión · Método de Faddeev–LeVerrier + Durand–Kerner + eliminación gaussiana compleja</footer>
+</div>
+
+<script>
+/* ==================================================================
+   UTILIDADES BÁSICAS
+   ================================================================== */
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+const SUB = '₀₁₂₃₄₅₆₇₈₉';
+const sup = d => String(d).split('').map(ch => SUP[+ch]).join('');
+const sub = d => String(d).split('').map(ch => SUB[+ch]).join('');
+
+function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=a%b; a=b; b=t; } return a; }
+function lcm(a,b){ return a/gcd(a,b)*b; }
+
+function zeros(n){ return Array.from({length:n},()=>new Array(n).fill(0)); }
+
+function maxAbsMat(A){ let m=0; for(const r of A) for(const x of r) m=Math.max(m,Math.abs(x)); return m; }
+
+function matMul(A,B){
+  const n=A.length, p=B.length, m=B[0].length;
+  const C=Array.from({length:n},()=>new Array(m).fill(0));
+  for(let i=0;i<n;i++) for(let k=0;k<p;k++){
+    const a=A[i][k]; if(a===0) continue;
+    for(let j=0;j<m;j++) C[i][j]+=a*B[k][j];
+  }
+  return C;
+}
+function trace(M){ let s=0; for(let i=0;i<M.length;i++) s+=M[i][i]; return s; }
+
+/* ==================================================================
+   ARITMÉTICA COMPLEJA  (representación [re, im])
+   ================================================================== */
+const cadd=(a,b)=>[a[0]+b[0], a[1]+b[1]];
+const csub=(a,b)=>[a[0]-b[0], a[1]-b[1]];
+const cmul=(a,b)=>[a[0]*b[0]-a[1]*b[1], a[0]*b[1]+a[1]*b[0]];
+const cdiv=(a,b)=>{ const d=b[0]*b[0]+b[1]*b[1]; return [(a[0]*b[0]+a[1]*b[1])/d, (a[1]*b[0]-a[0]*b[1])/d]; };
+const cabs=a=>Math.hypot(a[0],a[1]);
+const cneg=a=>[-a[0],-a[1]];
+
+/* ==================================================================
+   FORMATO DE NÚMEROS
+   ================================================================== */
+function rationalize(x, tol, maxDen){
+  maxDen = maxDen || 1000;
+  if(!isFinite(x)) return null;
+  if(x === 0) return {p:0, q:1};
+  const s = x < 0 ? -1 : 1;
+  const a = Math.abs(x);
+  let h0=0, h1=1, k0=1, k1=0;
+  let b = a;
+  for(let i=0;i<60;i++){
+    const ai = Math.floor(b);
+    const h2 = ai*h1 + h0;
+    const k2 = ai*k1 + k0;
+    if(k2 > maxDen) break;
+    h0=h1; h1=h2; k0=k1; k1=k2;
+    if(Math.abs(a - h1/k1) <= tol*Math.max(1, a)) return {p:s*h1, q:k1};
+    const fr = b - ai;
+    if(fr < 1e-15) break;
+    b = 1/fr;
+  }
+  return null;
+}
+
+function partStr(x){
+  if(!isFinite(x)) return '∞';
+  const ax = Math.abs(x);
+  if(ax < 1e-12) return '0';
+  const r = rationalize(x, 1e-9, 1000);
+  if(r) return r.q === 1 ? String(r.p) : (r.p + '/' + r.q);
+  let s = x.toPrecision(8);
+  if(s.includes('e')) return s.replace(/\.?0+e/, 'e');
+  if(s.includes('.')) s = s.replace(/0+$/,'').replace(/\.$/,'');
+  return s;
+}
+
+function fmtComplex(z){
+  const scale = Math.max(1, Math.abs(z[0]), Math.abs(z[1]));
+  const eps = 1e-9 * scale;
+  const re = Math.abs(z[0]) < eps ? 0 : z[0];
+  const im = Math.abs(z[1]) < eps ? 0 : z[1];
+  if(im === 0) return partStr(re);
+  const imAbs = partStr(Math.abs(im));
+  const imTxt = (imAbs === '1' ? '' : imAbs) + 'i';
+  if(re === 0) return (im < 0 ? '−' : '') + imTxt;
+  return partStr(re) + (im < 0 ? ' − ' : ' + ') + imTxt;
+}
+
+function isRealZ(z){
+  return Math.abs(z[1]) <= 1e-8 * Math.max(1, Math.abs(z[0]));
+}
+
+/* ==================================================================
+   POLINOMIO CARACTERÍSTICO  (Faddeev–LeVerrier)
+   ================================================================== */
+function charPoly(A){
+  const n = A.length;
+  const c = new Array(n+1).fill(0);
+  c[0] = 1;
+  let M = zeros(n);
+  for(let k=1;k<=n;k++){
+    const AM = matMul(A, M);
+    for(let i=0;i<n;i++) AM[i][i] += c[k-1];
+    M = AM;
+    const AM2 = matMul(A, M);
+    c[k] = -trace(AM2)/k;
+  }
+  return c;
+}
+
+function polyEval(c, z){
+  let r = [0,0];
+  for(let i=0;i<c.length;i++) r = cadd(cmul(r, z), [c[i], 0]);
+  return r;
+}
+
+/* ==================================================================
+   RAÍCES DEL POLINOMIO  (Durand–Kerner)
+   ================================================================== */
+function polyRoots(c){
+  const n = c.length - 1;
+  if(n < 1) return [];
+  if(n === 1) return [[-c[1]/c[0], 0]];
+
+  let mx = 0;
+  for(let i=1;i<=n;i++) mx = Math.max(mx, Math.abs(c[i]/c[0]));
+  const R = 1 + mx;
+
+  const w = [0.4, 0.9];
+  const roots = [];
+  let pw = [1,0];
+  for(let k=0;k<n;k++){ roots.push([R*pw[0], R*pw[1]]); pw = cmul(pw, w); }
+
+  for(let iter=0; iter<800; iter++){
+    let maxd = 0;
+    for(let i=0;i<n;i++){
+      const p = polyEval(c, roots[i]);
+      let den = [1,0];
+      for(let j=0;j<n;j++) if(j !== i) den = cmul(den, csub(roots[i], roots[j]));
+      if(cabs(den) < 1e-300) continue;
+      const d = cdiv(p, den);
+      roots[i] = csub(roots[i], d);
+      maxd = Math.max(maxd, cabs(d));
+    }
+    if(maxd < 1e-15*(1+R)) break;
+  }
+  return roots;
+}
+
+function clusterRoots(roots){
+  const n = roots.length;
+  const used = new Array(n).fill(false);
+  const out = [];
+  for(let i=0;i<n;i++){
+    if(used[i]) continue;
+    used[i] = true;
+    const grp = [roots[i]];
+    for(let j=i+1;j<n;j++){
+      if(used[j]) continue;
+      if(cabs(csub(roots[i], roots[j])) < 1e-5*(1 + cabs(roots[i]))){
+        used[j] = true; grp.push(roots[j]);
+      }
+    }
+    let s = [0,0];
+    for(const g of grp) s = cadd(s, g);
+    out.push({ root:[s[0]/grp.length, s[1]/grp.length], mult: grp.length });
+  }
+  return out;
+}
+
+function snapComplex(z){ return [snapReal(z[0]), snapReal(z[1])]; }
+function snapReal(x){
+  const r = rationalize(x, 1e-9, 1000);
+  return r ? r.p / r.q : x;
+}
+
+function mergeClusters(clusters){
+  const out = [];
+  for(const cl of clusters){
+    const found = out.find(o => cabs(csub(o.root, cl.root)) < 1e-6*(1 + cabs(cl.root)));
+    if(found) found.mult += cl.mult;
+    else out.push({ root: cl.root.slice(), mult: cl.mult });
+  }
+  return out;
+}
+
+/* ==================================================================
+   ESPACIO NULO  (Gauss–Jordan con pivoteo parcial, complejo)
+   ================================================================== */
+function nullSpace(M, tol){
+  const n = M.length;
+  const A = M.map(r => r.map(x => [x[0], x[1]]));
+  const pivots = [];
+  let row = 0;
+
+  for(let col=0; col<n && row<n; col++){
+    let best = -1, bestv = tol;
+    for(let i=row;i<n;i++){
+      const v = cabs(A[i][col]);
+      if(v > bestv){ bestv = v; best = i; }
+    }
+    if(best < 0) continue;
+
+    const tmp = A[row]; A[row] = A[best]; A[best] = tmp;
+    const p = A[row][col];
+    for(let j=col;j<n;j++) A[row][j] = cdiv(A[row][j], p);
+
+    for(let i=0;i<n;i++){
+      if(i === row) continue;
+      const f = A[i][col];
+      if(cabs(f) < 1e-300) continue;
+      for(let j=col;j<n;j++) A[i][j] = csub(A[i][j], cmul(f, A[row][j]));
+    }
+    pivots.push(col);
+    row++;
+  }
+
+  const pivSet = new Set(pivots);
+  const free = [];
+  for(let j=0;j<n;j++) if(!pivSet.has(j)) free.push(j);
+
+  return free.map(f => {
+    const v = Array.from({length:n}, () => [0,0]);
+    v[f] = [1,0];
+    pivots.forEach((pc, i) => { v[pc] = cneg(A[i][f]); });
+    return v;
+  });
+}
+
+/* ==================================================================
+   COCIENTE DE RAYLEIGH
+   ================================================================== */
+function rayleigh(A, v){
+  const n = A.length;
+  const Av = A.map(row => {
+    let s = [0,0];
+    for(let j=0;j<n;j++) s = cadd(s, cmul([row[j],0], v[j]));
+    return s;
+  });
+  let num = [0,0], den = [0,0];
+  for(let i=0;i<n;i++){
+    num = cadd(num, cmul([v[i][0], -v[i][1]], Av[i]));
+    den = cadd(den, [v[i][0]*v[i][0] + v[i][1]*v[i][1], 0]);
+  }
+  if(den[0] < 1e-300) return [0,0];
+  return cdiv(num, den);
+}
+
+/* ==================================================================
+   PRESENTACIÓN DEL POLINOMIO
+   ================================================================== */
+function polyString(c){
+  const n = c.length - 1;
+  let mx = 0;
+  for(const v of c) mx = Math.max(mx, Math.abs(v));
+  const eps = 1e-10 * Math.max(1, mx);
+
+  const terms = [];
+  for(let i=0;i<=n;i++){
+    if(Math.abs(c[i]) < eps) continue;
+    const deg = n - i;
+    const neg = c[i] < 0;
+    const mag = Math.abs(c[i]);
+    let coefTxt;
+    if(deg > 0 && Math.abs(mag - 1) < 1e-12) coefTxt = '';
+    else coefTxt = partStr(mag);
+    const varTxt = deg === 0 ? '' : (deg === 1 ? 'λ' : 'λ' + sup(deg));
+    terms.push({ neg, txt: coefTxt + varTxt });
+  }
+  if(terms.length === 0) return '0';
+  let s = (terms[0].neg ? '−' : '') + terms[0].txt;
+  for(let i=1;i<terms.length;i++) s += (terms[i].neg ? ' − ' : ' + ') + terms[i].txt;
+  return s;
+}
+
+/* ==================================================================
+   COMPONENTES DE UN VECTOR (normalización racional)
+   ================================================================== */
+function fmtVectorComponents(v){
+  const n = v.length;
+  const scale = Math.max(1, ...v.map(cabs));
+  const eps = 1e-9 * scale;
+  const allReal = v.every(x => Math.abs(x[1]) < eps);
+
+  if(allReal){
+    const rats = v.map(x => rationalize(x[0], 1e-9, 1000));
+    if(rats.every(r => r !== null)){
+      let L = 1;
+      for(const r of rats) L = lcm(L, r.q);
+      if(L <= 100000){
+        let nums = rats.map(r => r.p * (L / r.q));
+        let g = 0;
+        for(const x of nums) g = gcd(g, Math.abs(x));
+        if(g > 1) nums = nums.map(x => x / g);
+        const first = nums.find(x => x !== 0);
+        if(first !== undefined && first < 0) nums = nums.map(x => -x);
+        return nums.map(String);
+      }
+    }
+  }
+  return v.map(fmtComplex);
+}
+
+/* ==================================================================
+   RENDERIZADO DE VECTORES CON PARÉNTESIS
+   ================================================================== */
+function parenSVG(side){
+  const d = side === 'left' ? 'M9,3 Q1,50 9,97' : 'M1,3 Q9,50 1,97';
+  return '<svg class="paren" viewBox="0 0 10 100" preserveAspectRatio="none" aria-hidden="true">'
+       + '<path d="' + d + '" fill="none" vector-effect="non-scaling-stroke"/></svg>';
+}
+
+function fmtVectorHTML_vertical(v){
+  const comps = fmtVectorComponents(v);
+  return '<span class="vec-wrap">'
+    + parenSVG('left')
+    + '<span class="vec-col">' + comps.map(c => '<span class="vec-comp">' + c + '</span>').join('') + '</span>'
+    + parenSVG('right')
+    + '</span>';
+}
+
+function fmtVectorHTML_horizontal(v){
+  const comps = fmtVectorComponents(v);
+  return '<span class="vec-wrap">'
+    + parenSVG('left')
+    + '<span class="vec-row">' + comps.map(c => '<span class="vec-comp">' + c + '</span>').join('') + '</span>'
+    + parenSVG('right')
+    + '</span><span class="transp">ᵀ</span>';
+}
+
+function fmtVectorHTML(v, vertical){
+  return vertical ? fmtVectorHTML_vertical(v) : fmtVectorHTML_horizontal(v);
+}
+
+/* ==================================================================
+   INTERFAZ: MATRIZ DE ENTRADA CON PARÉNTESIS
+   ================================================================== */
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+function makeParen(side){
+  const svg = document.createElementNS(SVGNS, 'svg');
+  svg.setAttribute('class', 'paren');
+  svg.setAttribute('viewBox', '0 0 10 100');
+  svg.setAttribute('preserveAspectRatio', 'none');
+  svg.setAttribute('aria-hidden', 'true');
+
+  const path = document.createElementNS(SVGNS, 'path');
+  path.setAttribute('d', side === 'left' ? 'M9,3 Q1,50 9,97' : 'M1,3 Q9,50 1,97');
+  path.setAttribute('vector-effect', 'non-scaling-stroke');
+  svg.appendChild(path);
+  return svg;
+}
+
+function buildMatrix(n, values){
+  const wrap = document.getElementById('matrixWrap');
+  wrap.innerHTML = '';
+
+  const display = document.createElement('div');
+  display.className = 'matrix-display';
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  grid.style.gridTemplateColumns = `repeat(${n}, minmax(0, 1fr))`;
+  grid.style.width = Math.max(180, Math.min(500, n * 58)) + 'px';
+
+  for(let i=0;i<n;i++){
+    for(let j=0;j<n;j++){
+      const inp = document.createElement('input');
+      inp.type = 'text';
+      inp.inputMode = 'decimal';
+      inp.className = 'cell';
+      inp.dataset.i = i; inp.dataset.j = j;
+      inp.value = (values && values[i] && values[i][j] !== undefined)
+        ? values[i][j]
+        : (i === j ? '1' : '0');
+      inp.setAttribute('aria-label', `a${i+1}${j+1}`);
+      grid.appendChild(inp);
+    }
+  }
+
+  display.appendChild(makeParen('left'));
+  display.appendChild(grid);
+  display.appendChild(makeParen('right'));
+  wrap.appendChild(display);
+}
+
+function parseNum(s){
+  s = String(s).trim().replace(',', '.');
+  if(s === '') return 0;
+  if(/^[+-]?\d+\/\d+$/.test(s)){
+    const [a,b] = s.split('/');
+    const num = parseInt(a,10), den = parseInt(b,10);
+    if(den === 0) throw new Error('División por cero en una celda.');
+    return num/den;
+  }
+  const v = Number(s);
+  if(!isFinite(v)) throw new Error(`Valor no numérico: "${s}"`);
+  return v;
+}
+
+function leerMatriz(n){
+  const cells = document.querySelectorAll('#matrixWrap .cell');
+  if(cells.length !== n*n) throw new Error('La matriz no coincide con el tamaño indicado.');
+  const A = zeros(n);
+  let k = 0;
+  for(let i=0;i<n;i++) for(let j=0;j<n;j++) A[i][j] = parseNum(cells[k++].value);
+  return A;
+}
+
+/* ==================================================================
+   CÁLCULO PRINCIPAL
+   ================================================================== */
+function calcular(){
+  const out = document.getElementById('out');
+  out.innerHTML = '';
+
+  let n, A;
+  try{
+    n = parseInt(document.getElementById('n').value, 10);
+    if(!(n >= 1 && n <= 8)) throw new Error('El tamaño n debe estar entre 1 y 8.');
+    A = leerMatriz(n);
+  }catch(err){
+    out.innerHTML = `<div class="card err">⚠️ ${err.message}</div>`;
+    return;
+  }
+
+  const vertical = document.getElementById('orientVertical').checked;
+
+  const maxA = Math.max(1, maxAbsMat(A));
+  const c = charPoly(A);
+
+  let roots = polyRoots(c);
+  let clusters = clusterRoots(roots);
+
+  clusters.forEach(cl => {
+    let cur = cl.root;
+    for(let it=0; it<4; it++){
+      const tolNS = 1e-7 * (maxA + cabs(cur));
+      const M = A.map((row,i) => row.map((a,j) => [
+        a - (i === j ? cur[0] : 0),
+        (i === j ? -cur[1] : 0)
+      ]));
+      const basis = nullSpace(M, tolNS);
+      if(!basis.length) break;
+      const rq = rayleigh(A, basis[0]);
+      if(cabs(csub(rq, cur)) > 0.5*cabs(cur) + 1e-3) break;
+      const resOld = cabs(polyEval(c, cur));
+      const resNew = cabs(polyEval(c, rq));
+      if(resNew > resOld) break;
+      const delta = cabs(csub(rq, cur));
+      cur = rq;
+      if(delta < 1e-15) break;
+    }
+    cl.root = snapComplex(cur);
+  });
+
+  clusters = mergeClusters(clusters);
+
+  const data = clusters.map(cl => {
+    const lam = cl.root;
+    const tolNS = 1e-7 * (maxA + cabs(lam));
+    const M = A.map((row,i) => row.map((a,j) => [
+      a - (i === j ? lam[0] : 0),
+      (i === j ? -lam[1] : 0)
+    ]));
+    const basis = nullSpace(M, tolNS);
+    return { root: lam, mult: cl.mult, basis, dim: basis.length };
+  });
+
+  data.sort((a,b) => {
+    const ar = isRealZ(a.root) ? 0 : 1;
+    const br = isRealZ(b.root) ? 0 : 1;
+    if(ar !== br) return ar - br;
+    if(Math.abs(a.root[0] - b.root[0]) > 1e-12) return a.root[0] - b.root[0];
+    return a.root[1] - b.root[1];
+  });
+
+  let html = '';
+
+  /* 1 · Polinomio característico */
+  html += `<div class="card">
+    <h2>1 · Polinomio característico</h2>
+    <div class="formula">p(λ) = det(λ·I − A) = ${polyString(c)}</div>
+    <p class="muted">Polinomio de grado ${n}. Sus raíces (reales o complejas) son los autovalores de A.</p>
+  </div>`;
+
+  /* 2 · Resumen */
+  const totalGeo = data.reduce((s,d) => s + d.dim, 0);
+  const hayComplejos = data.some(d => !isRealZ(d.root));
+  const diagC = (totalGeo === n);
+  const diagR = diagC && !hayComplejos;
+  const lista = data.map(d => fmtComplex(d.root)).join(' , ');
+
+  html += `<div class="card">
+    <h2>2 · Autovalores</h2>
+    <div class="formula">σ(A) = { ${lista} }</div>
+    <div class="kv" style="margin-top:14px">
+      <span>Multiplicidad algebraica total: <b>${data.reduce((s,d)=>s+d.mult,0)}</b></span>
+      <span>Multiplicidad geométrica total: <b>${totalGeo}</b></span>
+      <span>Diagonalizable sobre ℂ: <b>${diagC ? 'sí' : 'no'}</b></span>
+      <span>Diagonalizable sobre ℝ: <b>${diagR ? 'sí' : 'no'}</b></span>
+    </div>
+  </div>`;
+
+  /* 3 · Subespacios propios */
+  html += `<div class="card"><h2>3 · Autovectores y subespacios propios</h2>`;
+
+  data.forEach((d, idx) => {
+    const lam = d.root;
+    const lamStr = fmtComplex(lam);
+    const real = isRealZ(lam);
+    const campo = real ? 'ℝ' : 'ℂ';
+    const defectuoso = d.dim < d.mult;
+
+    html += `<div style="margin-bottom:6px">
+      <div class="eig-top">
+        <span class="eig-lam">λ${sub(idx+1)} = <b>${lamStr}</b></span>
+        <span class="chip">mult. algebraica: ${d.mult}</span>
+        <span class="chip ${defectuoso ? 'warn' : 'good'}">mult. geométrica: ${d.dim}</span>
+        ${defectuoso ? '<span class="chip warn">matriz defectuosa para λ' + sub(idx+1) + '</span>' : ''}
+      </div>`;
+
+    html += `<div class="eq">E<sub>${lamStr}</sub> = Nul(A − (${lamStr})·I) ⊆ ${campo}<sup>${n}</sup> , &nbsp; dim E<sub>${lamStr}</sub> = ${d.dim}</div>`;
+
+    if(d.dim === 0){
+      html += `<p class="muted">No se ha podido determinar una base numéricamente estable de este subespacio.</p>`;
+    }else{
+      html += `<div class="vecs">`;
+      d.basis.forEach((v, k) => {
+        html += `<div class="vec">
+          <span class="nm">v${sub(k+1)}</span>
+          <span class="eq-sign">=</span>
+          ${fmtVectorHTML(v, vertical)}
+        </div>`;
+      });
+      html += `</div>`;
+      const nombres = d.basis.map((_,k) => 'v' + sub(k+1)).join(', ');
+      html += `<p class="muted">Base: E<sub>${lamStr}</sub> = gen{ ${nombres} } &nbsp;—&nbsp; ${descSubespacio(d.dim, n, campo)}</p>`;
+    }
+
+    html += `</div>`;
+    if(idx < data.length - 1) html += `<div class="sep"></div>`;
+  });
+
+  html += `</div>`;
+
+  /* 4 · Interpretación */
+  html += `<div class="card">
+    <h2>4 · Interpretación</h2>
+    <p class="muted">
+      ${ diagC
+          ? (hayComplejos
+              ? 'La suma de las multiplicidades geométricas es igual a n, por lo que <b>A</b> es diagonalizable sobre ℂ (pero no sobre ℝ, ya que posee autovalores complejos no reales).'
+              : 'La suma de las multiplicidades geométricas es igual a n y todos los autovalores son reales: <b>A</b> es diagonalizable sobre ℝ.')
+          : 'La suma de las multiplicidades geométricas es menor que n: <b>A</b> no es diagonalizable. Para algún autovalor la multiplicidad algebraica supera a la geométrica.'
+      }
+    </p>
+  </div>`;
+
+  out.innerHTML = html;
+}
+
+function descSubespacio(dim, n, campo){
+  if(dim === 0) return 'subespacio trivial {0}';
+  if(dim === 1) return `una recta vectorial de ${campo}${sup(n)} que pasa por el origen`;
+  if(dim === n) return `todo el espacio ${campo}${sup(n)} (A = λ·I)`;
+  if(dim === n-1) return `un hiperplano de ${campo}${sup(n)}`;
+  if(dim === 2) return `un plano vectorial de ${campo}${sup(n)}`;
+  return `un subespacio de dimensión ${dim} en ${campo}${sup(n)}`;
+}
+
+/* ==================================================================
+   EVENTOS
+   ================================================================== */
+document.getElementById('n').addEventListener('change', e => {
+  let n = parseInt(e.target.value, 10);
+  if(!(n >= 1 && n <= 8)){ n = 3; e.target.value = 3; }
+  buildMatrix(n);
+  document.getElementById('out').innerHTML = '';
+});
+
+document.getElementById('btnGen').addEventListener('click', () => {
+  const n = parseInt(document.getElementById('n').value, 10) || 3;
+  buildMatrix(n);
+  document.getElementById('out').innerHTML = '';
+});
+
+document.getElementById('btnEj').addEventListener('click', () => {
+  const ejemplos = [
+    [[2,0,0],[0,3,0],[0,0,4]],
+    [[2,1],[1,2]],
+    [[4,1,0],[0,4,1],[0,0,4]],
+    [[0,-1],[1,0]],
+    [[1,2,3],[4,5,6],[7,8,10]]
+  ];
+  const M = ejemplos[Math.floor(Math.random()*ejemplos.length)];
+  const n = M.length;
+  document.getElementById('n').value = n;
+  buildMatrix(n, M);
+  document.getElementById('out').innerHTML = '';
+});
+
+document.getElementById('btnCalc').addEventListener('click', calcular);
+
+/* Al cambiar la orientación, si ya hay resultados, recalculamos para redibujar */
+document.getElementById('orientVertical').addEventListener('change', () => {
+  const out = document.getElementById('out');
+  if(out.innerHTML.trim()) calcular();
+});
+
+buildMatrix(3);
+</script>
+</body>
+</html>

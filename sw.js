@@ -16,7 +16,7 @@
 /* Versión visible de la aplicación: el chip junto al título la lee del
    service worker mediante mensajes (GET_VERSION / VERSION). Al subir la
    versión se invalida automáticamente la caché antigua de los visitantes. */
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.2.1';
 const CACHE_VERSION = 'autovalores-' + APP_VERSION;
 
 /* Recursos pre-cacheados en la instalación (rutas relativas al scope). */

@@ -10,13 +10,13 @@
    https://tecdea.github.io. Además, el gestor de peticiones ignora
    expresamente cualquier URL fuera de ese prefijo (doble seguridad).
 
-   Para publicar una nueva versión, sube CACHE_VERSION (p. ej. v1.0.1):
+   Para publicar una nueva versión, sube APP_VERSION (p. ej. '1.1.2'):
    eso invalida la caché antigua de todos los visitantes.
    ================================================================== */
 /* Versión visible de la aplicación: el chip junto al título la lee del
    service worker mediante mensajes (GET_VERSION / VERSION). Al subir la
    versión se invalida automáticamente la caché antigua de los visitantes. */
-const APP_VERSION = '1.1.0';
+const APP_VERSION = '1.1.1';
 const CACHE_VERSION = 'autovalores-' + APP_VERSION;
 
 /* Recursos pre-cacheados en la instalación (rutas relativas al scope). */

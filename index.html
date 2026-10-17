@@ -4,6 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Autovalores, autovectores y subespacios propios</title>
+<meta name="description" content="Calcula el polinomio característico, los autovalores (reales y complejos) y una base de cada subespacio propio Eλ = Ker(A − λI), con multiplicidades algebraica y geométrica.">
+<meta name="theme-color" content="#0b0e1a">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="img/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="img/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Autovalores">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tecdea.github.io/autovaloresyautovectores/">
+<meta property="og:title" content="Autovalores, autovectores y subespacios propios">
+<meta property="og:description" content="Calcula el polinomio característico, los autovalores (reales y complejos) y una base de cada subespacio propio Eλ = Ker(A − λI).">
+<meta property="og:image" content="https://tecdea.github.io/autovaloresyautovectores/img/og-image.png">
+<meta property="og:locale" content="es_ES">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root{
     --bg1:#0b0e1a; --bg2:#070911;
@@ -75,7 +93,6 @@
   .toggle:hover{border-color:#3a4a85}
   .toggle input{width:15px;height:15px;accent-color:var(--acc);cursor:pointer;margin:0}
 
-  /* ---------- MATRIZ CON PARÉNTESIS ---------- */
   .matrix-display{
     display:flex;align-items:stretch;justify-content:center;
     gap:6px;margin:18px auto 0;max-width:580px;padding:2px 0;
@@ -126,7 +143,6 @@
     padding:11px 14px;margin:10px 0;overflow-x:auto;white-space:nowrap;
   }
 
-  /* ---------- AUTOVECTORES ---------- */
   .vecs{display:flex;flex-direction:column;gap:8px;margin:10px 0 4px}
   .vec{
     font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14.5px;
@@ -168,7 +184,26 @@
   .sep{height:1px;background:linear-gradient(90deg,transparent,var(--line),transparent);margin:16px 0}
   .kv{display:flex;flex-wrap:wrap;gap:18px;font-size:14px;color:#c3cdf2}
   .kv span b{color:var(--acc2)}
+  .note{font-size:12.5px;color:#7c87b3;margin-top:14px;line-height:1.55}
   footer{text-align:center;color:#5d6890;font-size:12.5px;margin-top:28px}
+  .foot-extra{display:block;margin-top:6px;font-size:11.5px;color:#4d5878}
+  header a{color:var(--acc2);text-decoration:none;border-bottom:1px dotted rgba(56,217,176,.5)}
+  header a:hover{filter:brightness(1.15)}
+  details.card{padding:0 0 6px;overflow:hidden}
+  details.card summary{
+    list-style:none;cursor:pointer;user-select:none;
+    padding:16px 20px;margin:0;
+    font-size:14px;font-weight:650;letter-spacing:.04em;text-transform:uppercase;color:#aebbf0;
+    display:flex;align-items:center;gap:8px;
+  }
+  details.card summary::-webkit-details-marker{display:none}
+  details.card summary::after{content:'+';margin-left:auto;color:var(--acc);font-size:19px;font-weight:700}
+  details.card[open] summary::after{content:'−'}
+  details.card summary:hover{color:#cdd7ff}
+  .ayuda-body{border-top:1px solid var(--line);padding:6px 20px 14px}
+  .ayuda-body p{font-size:14px;color:#c3cdf2;line-height:1.7;margin:12px 0}
+  .ayuda-body b{color:#e6ebff}
+  .ayuda-body .formula{font-size:14.5px;margin:12px 0}
 </style>
 </head>
 <body>
@@ -177,8 +212,39 @@
     <h1>Autovalores, autovectores y subespacios propios</h1>
     <p>Introduce una matriz cuadrada <b>A</b> de tamaño <b>n × n</b>. La aplicación calculará su
        polinomio característico, sus autovalores (reales y complejos), una base de cada
-       subespacio propio <b>E<sub>λ</sub> = Nul(A − λI)</b> y las multiplicidades algebraica y geométrica.</p>
+       subespacio propio <b>E<sub>λ</sub> = Ker(A − λI)</b> (<a href="#ayuda">ver qué significa</a>)
+       y las multiplicidades algebraica y geométrica.</p>
   </header>
+
+  <details class="card" id="ayuda">
+    <summary>¿Qué significa E<sub>λ</sub> = Ker(A − λI)?</summary>
+    <div class="ayuda-body">
+      <p><b>Definición.</b> Sea A una matriz cuadrada de tamaño n × n. Un número λ es un <b>autovalor</b>
+         de A si existe algún vector v ≠ 0 tal que A·v = λ·v; cada uno de esos vectores es un
+         <b>autovector</b> asociado a λ. El <b>subespacio propio</b> asociado a λ es el conjunto formado
+         por todos sus autovectores junto con el vector 0:</p>
+      <div class="formula">E<sub>λ</sub> = { v ∈ ℝ<sup>n</sup> : A·v = λ·v }</div>
+      <p>Restando λ·v en los dos miembros, la condición A·v = λ·v equivale al sistema homogéneo
+         (A − λ·I)·v = 0, donde I es la matriz identidad de tamaño n. El conjunto de soluciones de un
+         sistema homogéneo M·x = 0 se llama <b>espacio nulo</b> (o <b>núcleo</b>) de la matriz M. Por tanto:</p>
+      <div class="formula">E<sub>λ</sub> = Ker(A − λ·I) = Nul(A − λ·I) = { v : (A − λ·I)·v = 0 }</div>
+      <p><b>Sobre la notación.</b> Ker viene de «Kern» (núcleo, notación habitual en español) y Nul de
+         «null space» (espacio nulo, usada en libros de texto en inglés, p. ej. el de D. C. Lay). Las dos
+         designan exactamente lo mismo: el conjunto de todos los vectores que la matriz M envía al vector
+         0. Aquí usamos Ker; si λ es complejo, el conjunto vive en ℂ<sup>n</sup> en lugar de ℝ<sup>n</sup>.</p>
+      <p><b>Por qué es un subespacio.</b> Como E<sub>λ</sub> es el conjunto de soluciones de un sistema
+         homogéneo, siempre es un subespacio vectorial: contiene al vector 0, y si u, w ∈ E<sub>λ</sub>,
+         entonces A·(u + w) = λ·u + λ·w = λ·(u + w) y A·(c·u) = c·(λ·u), de modo que u + w y c·u también
+         pertenecen a E<sub>λ</sub>. Su dimensión es la <b>multiplicidad geométrica</b> de λ, y una base
+         se obtiene resolviendo (A − λ·I)·v = 0 por eliminación gaussiana–Jordan: cada variable libre
+         aporta un vector de la base. Si la dimensión geométrica es menor que la algebraica, la matriz es
+         defectuosa para ese autovalor y no será diagonalizable.</p>
+      <p><b>Ejemplo.</b> Para la matriz A = [[2, 1], [1, 2]] (filas (2, 1) y (1, 2)), el polinomio
+         característico es (λ − 1)·(λ − 3), luego los autovalores son λ = 1 y λ = 3, y
+         E<sub>3</sub> = Ker(A − 3I) = gen{(1, 1)}, la recta y = x. Pulsa «Cargar ejemplo» y «Calcular»
+         para comprobarlo en la sección 3.</p>
+    </div>
+  </details>
 
   <section class="card">
     <div class="row">
@@ -187,6 +253,7 @@
       <button class="ghost" id="btnGen">Generar matriz</button>
       <button class="ghost" id="btnEj">Cargar ejemplo</button>
       <button class="primary" id="btnCalc">Calcular</button>
+      <button class="ghost" id="btnInstall" hidden>Instalar app</button>
       <label class="toggle" title="Cambia la orientación de los autovectores">
         <input type="checkbox" id="orientVertical" checked>
         <span>Vectores en columna</span>
@@ -198,7 +265,8 @@
 
   <section id="out"></section>
 
-  <footer>Cálculo numérico en doble precisión · Método de Faddeev–LeVerrier + Durand–Kerner + eliminación gaussiana compleja</footer>
+  <footer>Cálculo numérico en doble precisión · Método de Faddeev–LeVerrier + Durand–Kerner + eliminación gaussiana compleja
+    <span class="foot-extra">Aplicación instalable (PWA) · funciona sin conexión una vez visitada</span></footer>
 </div>
 
 <script>
@@ -212,11 +280,8 @@ const sub = d => String(d).split('').map(ch => SUB[+ch]).join('');
 
 function gcd(a,b){ a=Math.abs(a); b=Math.abs(b); while(b){ const t=a%b; a=b; b=t; } return a; }
 function lcm(a,b){ return a/gcd(a,b)*b; }
-
 function zeros(n){ return Array.from({length:n},()=>new Array(n).fill(0)); }
-
 function maxAbsMat(A){ let m=0; for(const r of A) for(const x of r) m=Math.max(m,Math.abs(x)); return m; }
-
 function matMul(A,B){
   const n=A.length, p=B.length, m=B[0].length;
   const C=Array.from({length:n},()=>new Array(m).fill(0));
@@ -229,7 +294,7 @@ function matMul(A,B){
 function trace(M){ let s=0; for(let i=0;i<M.length;i++) s+=M[i][i]; return s; }
 
 /* ==================================================================
-   ARITMÉTICA COMPLEJA  (representación [re, im])
+   ARITMÉTICA COMPLEJA
    ================================================================== */
 const cadd=(a,b)=>[a[0]+b[0], a[1]+b[1]];
 const csub=(a,b)=>[a[0]-b[0], a[1]-b[1]];
@@ -263,16 +328,81 @@ function rationalize(x, tol, maxDen){
   return null;
 }
 
+/* Constantes irracionales comunes que intentamos reconocer al mostrar */
+const CONSTANTS_LIST = [
+  [Math.SQRT2,      '√2'],
+  [Math.SQRT2/2,    '√2/2'],
+  [Math.SQRT2/3,    '√2/3'],
+  [Math.sqrt(3),    '√3'],
+  [Math.sqrt(3)/2,  '√3/2'],
+  [Math.sqrt(3)/3,  '√3/3'],
+  [Math.sqrt(5),    '√5'],
+  [Math.sqrt(5)/2,  '√5/2'],
+  [Math.sqrt(5)/5,  '√5/5']
+];
+
 function partStr(x){
   if(!isFinite(x)) return '∞';
   const ax = Math.abs(x);
   if(ax < 1e-12) return '0';
+
+  /* 1. Entero o fracción simple vía racionalización */
   const r = rationalize(x, 1e-9, 1000);
-  if(r) return r.q === 1 ? String(r.p) : (r.p + '/' + r.q);
-  let s = x.toPrecision(8);
-  if(s.includes('e')) return s.replace(/\.?0+e/, 'e');
-  if(s.includes('.')) s = s.replace(/0+$/,'').replace(/\.$/,'');
-  return s;
+  if(r){
+    const sign = r.p < 0 ? '−' : '';
+    const p = Math.abs(r.p);
+    return sign + (r.q === 1 ? String(p) : (p + '/' + r.q));
+  }
+
+  /* 2. Constantes irracionales comunes */
+  const sign = x < 0 ? '−' : '';
+  for(const [v, s] of CONSTANTS_LIST){
+    if(Math.abs(ax - v) < 1e-6 * Math.max(1, v)) return sign + s;
+  }
+
+  /* 3. Decimal redondeado a 5 cifras significativas */
+  let s = x.toPrecision(5);
+  if(s.includes('e')) s = s.replace(/\.?0+e/, 'e');
+  else if(s.includes('.')) s = s.replace(/0+$/,'').replace(/\.$/,'');
+  return s.replace('-', '−');
+}
+
+/* ==================================================================
+   AJUSTE A VALORES "BONITOS" (snapping)
+   ================================================================== */
+function snapReal(x){
+  if(!isFinite(x) || x === 0) return x;
+  const ax = Math.abs(x);
+  const tol = 1e-6 * Math.max(1, ax);
+
+  /* 1. Cercano a un entero */
+  const ri = Math.round(x);
+  if(Math.abs(x - ri) < tol) return ri;
+
+  /* 2. Cercano a una fracción simple p/q con q ≤ 12 */
+  for(let q = 2; q <= 12; q++){
+    const p = Math.round(x * q);
+    if(p !== 0 && Math.abs(x - p/q) < tol) return p/q;
+  }
+
+  /* 3. Cercano a una constante irracional común */
+  const irr = [
+    Math.SQRT2, Math.SQRT2/2, Math.SQRT2/3,
+    Math.sqrt(3), Math.sqrt(3)/2, Math.sqrt(3)/3,
+    Math.sqrt(5), Math.sqrt(5)/2, Math.sqrt(5)/5
+  ];
+  for(const v of irr){
+    if(Math.abs(x - v) < tol) return v;
+    if(Math.abs(x + v) < tol) return -v;
+  }
+
+  return x;
+}
+
+function snapComplex(z){ return [snapReal(z[0]), snapReal(z[1])]; }
+
+function isRealZ(z){
+  return Math.abs(z[1]) <= 1e-8 * Math.max(1, Math.abs(z[0]));
 }
 
 function fmtComplex(z){
@@ -285,10 +415,6 @@ function fmtComplex(z){
   const imTxt = (imAbs === '1' ? '' : imAbs) + 'i';
   if(re === 0) return (im < 0 ? '−' : '') + imTxt;
   return partStr(re) + (im < 0 ? ' − ' : ' + ') + imTxt;
-}
-
-function isRealZ(z){
-  return Math.abs(z[1]) <= 1e-8 * Math.max(1, Math.abs(z[0]));
 }
 
 /* ==================================================================
@@ -367,12 +493,6 @@ function clusterRoots(roots){
     out.push({ root:[s[0]/grp.length, s[1]/grp.length], mult: grp.length });
   }
   return out;
-}
-
-function snapComplex(z){ return [snapReal(z[0]), snapReal(z[1])]; }
-function snapReal(x){
-  const r = rationalize(x, 1e-9, 1000);
-  return r ? r.p / r.q : x;
 }
 
 function mergeClusters(clusters){
@@ -475,16 +595,17 @@ function polyString(c){
 }
 
 /* ==================================================================
-   COMPONENTES DE UN VECTOR (normalización racional)
+   COMPONENTES DE UN VECTOR  (con redondeo inteligente)
    ================================================================== */
 function fmtVectorComponents(v){
-  const n = v.length;
-  const scale = Math.max(1, ...v.map(cabs));
+  const snapped = v.map(z => [snapReal(z[0]), snapReal(z[1])]);
+  const scale = Math.max(1, ...snapped.map(cabs));
   const eps = 1e-9 * scale;
-  const allReal = v.every(x => Math.abs(x[1]) < eps);
+  const allReal = snapped.every(x => Math.abs(x[1]) < eps);
 
   if(allReal){
-    const rats = v.map(x => rationalize(x[0], 1e-9, 1000));
+    /* Intento 1: normalizar a enteros si todos los componentes son racionales */
+    const rats = snapped.map(x => rationalize(x[0], 1e-9, 1000));
     if(rats.every(r => r !== null)){
       let L = 1;
       for(const r of rats) L = lcm(L, r.q);
@@ -498,8 +619,15 @@ function fmtVectorComponents(v){
         return nums.map(String);
       }
     }
+    /* Intento 2: dividir por la primera componente no nula (hace 1 el primer hueco) */
+    const firstIdx = snapped.findIndex(x => Math.abs(x[0]) > eps);
+    if(firstIdx >= 0){
+      const fv = snapped[firstIdx][0];
+      const divided = snapped.map(x => snapReal(x[0] / fv));
+      return divided.map(partStr);
+    }
   }
-  return v.map(fmtComplex);
+  return snapped.map(fmtComplex);
 }
 
 /* ==================================================================
@@ -626,13 +754,13 @@ function calcular(){
   }
 
   const vertical = document.getElementById('orientVertical').checked;
-
   const maxA = Math.max(1, maxAbsMat(A));
   const c = charPoly(A);
 
   let roots = polyRoots(c);
   let clusters = clusterRoots(roots);
 
+  /* Refinamiento de cada autovalor con cociente de Rayleigh y ajuste final */
   clusters.forEach(cl => {
     let cur = cl.root;
     for(let it=0; it<4; it++){
@@ -652,11 +780,12 @@ function calcular(){
       cur = rq;
       if(delta < 1e-15) break;
     }
-    cl.root = snapComplex(cur);
+    cl.root = snapComplex(cur);   /* ← ajuste a valor "bonito" */
   });
 
   clusters = mergeClusters(clusters);
 
+  /* Cálculo de cada subespacio propio usando el autovalor ya ajustado */
   const data = clusters.map(cl => {
     const lam = cl.root;
     const tolNS = 1e-7 * (maxA + cabs(lam));
@@ -704,7 +833,13 @@ function calcular(){
   </div>`;
 
   /* 3 · Subespacios propios */
-  html += `<div class="card"><h2>3 · Autovectores y subespacios propios</h2>`;
+  html += `<div class="card"><h2>3 · Autovectores y subespacios propios</h2>
+    <p class="muted">Para cada autovalor λ, el <b>subespacio propio</b> E<sub>λ</sub> es el conjunto de todos
+    los vectores v que cumplen A·v = λ·v, junto con el vector 0 (que cumple la igualdad pero no es
+    autovector). Restando λ·v a ambos lados, la condición equivale al sistema homogéneo (A − λ·I)·v = 0,
+    cuyo conjunto de soluciones es el <b>espacio nulo</b> o <b>núcleo</b> de la matriz A − λ·I, denotado
+    Ker(A − λ·I) —en algunos libros, Nul(A − λ·I)—. Por eso E<sub>λ</sub> = Ker(A − λ·I). La base que se
+    muestra para cada autovalor se obtiene resolviendo ese sistema por eliminación gaussiana–Jordan.</p>`;
 
   data.forEach((d, idx) => {
     const lam = d.root;
@@ -721,7 +856,7 @@ function calcular(){
         ${defectuoso ? '<span class="chip warn">matriz defectuosa para λ' + sub(idx+1) + '</span>' : ''}
       </div>`;
 
-    html += `<div class="eq">E<sub>${lamStr}</sub> = Nul(A − (${lamStr})·I) ⊆ ${campo}<sup>${n}</sup> , &nbsp; dim E<sub>${lamStr}</sub> = ${d.dim}</div>`;
+    html += `<div class="eq">E<sub>${lamStr}</sub> = Ker(A − (${lamStr})·I) = { v ∈ ${campo}<sup>${n}</sup> : A·v = (${lamStr})·v } , &nbsp; dim E<sub>${lamStr}</sub> = ${d.dim}</div>`;
 
     if(d.dim === 0){
       html += `<p class="muted">No se ha podido determinar una base numéricamente estable de este subespacio.</p>`;
@@ -743,6 +878,7 @@ function calcular(){
     if(idx < data.length - 1) html += `<div class="sep"></div>`;
   });
 
+  html += `<div class="note">ℹ️ Los valores se ajustan a su representación más simple: enteros, fracciones sencillas, radicales comunes (√2, √3, √5) o decimales con 5 cifras significativas.</div>`;
   html += `</div>`;
 
   /* 4 · Interpretación */
@@ -792,7 +928,8 @@ document.getElementById('btnEj').addEventListener('click', () => {
     [[2,1],[1,2]],
     [[4,1,0],[0,4,1],[0,0,4]],
     [[0,-1],[1,0]],
-    [[1,2,3],[4,5,6],[7,8,10]]
+    [[1,2,3],[4,5,6],[7,8,10]],
+    [[0,1],[1,1]]
   ];
   const M = ejemplos[Math.floor(Math.random()*ejemplos.length)];
   const n = M.length;
@@ -803,13 +940,57 @@ document.getElementById('btnEj').addEventListener('click', () => {
 
 document.getElementById('btnCalc').addEventListener('click', calcular);
 
-/* Al cambiar la orientación, si ya hay resultados, recalculamos para redibujar */
 document.getElementById('orientVertical').addEventListener('change', () => {
   const out = document.getElementById('out');
   if(out.innerHTML.trim()) calcular();
 });
 
 buildMatrix(3);
+</script>
+
+<script>
+/* ==================================================================
+   PWA: botón de instalación + registro del service worker.
+   El worker se registra con ruta relativa ('./sw.js'), por lo que su
+   alcance queda limitado a esta carpeta y no afecta al portal raíz.
+   ================================================================== */
+(function(){
+  const btn = document.getElementById('btnInstall');
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btn.hidden = false;
+  });
+
+  btn.addEventListener('click', async () => {
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    try{
+      const { outcome } = await deferredPrompt.userChoice;
+      if(outcome === 'accepted') btn.hidden = true;
+    }catch(err){ /* elección no disponible */ }
+    deferredPrompt = null;
+  });
+
+  window.addEventListener('appinstalled', () => { btn.hidden = true; });
+
+  document.querySelectorAll('a[href="#ayuda"]').forEach(a => {
+    a.addEventListener('click', () => {
+      const d = document.getElementById('ayuda');
+      if(d) d.open = true;
+    });
+  });
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js', { scope: './' })
+        .then(reg => console.info('Service worker activo con alcance:', reg.scope))
+        .catch(err => console.warn('No se pudo registrar el service worker:', err));
+    });
+  }
+})();
 </script>
 </body>
 </html>
